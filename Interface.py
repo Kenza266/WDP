@@ -16,7 +16,8 @@ warnings.filterwarnings('ignore')
 
 gains, winners = [], []
 solvers = ['Brute force','Q-Learning', 'Tabu Search']
-my_color = 'red'
+bg_color = '#0d0d13'
+my_color = '#9c0101'
 
 if 'instance' not in st.session_state:
 	st.session_state.instance = None
@@ -30,6 +31,8 @@ if 'report_demo' not in st.session_state:
 	st.session_state.report_demo = None
 if 'solver' not in st.session_state:
 	st.session_state.solver = None
+if 'plot' not in st.session_state:
+	st.session_state.plot = None
 
 class Instance():
   class bidder:
@@ -246,47 +249,65 @@ if run_button:
         t = time.time() - start_time
         info.empty()
         df = pd.DataFrame({'Time(s)':[t], 
-                       'Winning bids':[w],
-                       'Gain':[g]})
+                           'Winning bids':[w],
+                           'Gain':[g]})
         st.session_state.styler = df.style.hide_index()
         st.session_state.report = st.write(st.session_state.styler.to_html(), unsafe_allow_html=True)
-    if st.session_state.solver=='Q-Learning':
+    elif st.session_state.solver=='Q-Learning':
         start_time = time.time() 
         scores = st.session_state.instance.train(5000)
         w_Q, g_Q = st.session_state.instance.evaluate()
         t = time.time() - start_time
         w, g = len(w_Q), g_Q
         df = pd.DataFrame({'Time(s)':[t], 
-                       'Winning bids':[w],
-                       'Gain':[g]})
+                           'Winning bids':[w],
+                           'Gain':[g]})
         st.session_state.styler = df.style.hide_index()
         st.session_state.report = st.write(st.session_state.styler.to_html(), unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.plot(scores, color='red') 
-        ax.set_xlabel('No of iterations') 
-        ax.set_ylabel('Reward gained')
-        ax.set_title('Evolution of the reward gained')
-        buf = BytesIO()
-        fig.savefig(buf, format="png")
-        st.image(buf)
-    if st.session_state.solver=='Tabu Search':
+        fig.patch.set_facecolor(bg_color)
+        ax.plot(scores, color=my_color) 
+        ax.set_xlabel('No of iterations').set_color(my_color)
+        ax.set_ylabel('Reward gained').set_color(my_color)
+        ax.set_title('Evolution of the reward gained').set_color(my_color)
+        ax.spines['left'].set_color(my_color)
+        ax.spines['bottom'].set_color(my_color)
+        ax.spines['top'].set_color(bg_color)
+        ax.spines['right'].set_color(bg_color)
+        ax.tick_params(axis='x', colors=my_color)
+        ax.tick_params(axis='y', colors=my_color)
+        ax.set_facecolor(bg_color)
+        st.session_state.plot = BytesIO()
+        fig.savefig(st.session_state.plot, format="png")
+        st.image(st.session_state.plot)
+    elif st.session_state.solver=='Tabu Search':
         start_time = time.time() 
         history, solution = st.session_state.instance.run(epochs=1000, stable=10, early=10)
         t = time.time() - start_time
         w, g = len(solution[0]), solution[1]
         df = pd.DataFrame({'Time(s)':[t], 
-                       'Winning bids':[w],
-                       'Gain':[g]})
+                           'Winning bids':[w],
+                           'Gain':[g]})
         st.session_state.styler = df.style.hide_index()
         st.session_state.report = st.write(st.session_state.styler.to_html(), unsafe_allow_html=True)
         fig, ax = plt.subplots(figsize=(6, 4))
-        ax.plot(history, color='red') 
-        ax.set_xlabel('No of iterations') 
-        ax.set_ylabel('Reward gained')
-        ax.set_title('Evolution of the reward gained')
-        buf = BytesIO()
-        fig.savefig(buf, format="png")
-        st.image(buf)
+        fig.patch.set_facecolor(bg_color)
+        ax.plot(history, color=my_color) 
+        ax.set_xlabel('No of iterations').set_color(my_color)
+        ax.set_ylabel('Reward gained').set_color(my_color)
+        ax.set_title('Evolution of the reward gained').set_color(my_color)
+        ax.spines['left'].set_color(my_color)
+        ax.spines['bottom'].set_color(my_color)
+        ax.spines['top'].set_color(bg_color)
+        ax.spines['right'].set_color(bg_color)
+        ax.tick_params(axis='x', colors=my_color)
+        ax.tick_params(axis='y', colors=my_color)
+        ax.set_facecolor(bg_color)
+        st.session_state.plot = BytesIO()
+        fig.savefig(st.session_state.plot, format="png")
+        st.image(st.session_state.plot)
 elif st.session_state.styler:
     st.subheader(st.session_state.solver)
     st.session_state.report = st.write(st.session_state.styler.to_html(), unsafe_allow_html=True)
+    if st.session_state.plot:
+        st.image(st.session_state.plot)
